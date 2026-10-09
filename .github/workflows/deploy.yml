@@ -1,0 +1,49 @@
+name: Deploy TMA to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch: # ручной запуск из вкладки Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Переменные TMA берутся из Settings → Secrets and variables → Actions → Variables.
+      # Они не секреты (попадают в бандл), поэтому Variables, а не Secrets.
+      - run: npm run build:tma
+        env:
+          VITE_TG_APP_URL: ${{ vars.VITE_TG_APP_URL }}
+          VITE_ADSGRAM_BLOCK_ID: ${{ vars.VITE_ADSGRAM_BLOCK_ID }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

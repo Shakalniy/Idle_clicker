@@ -1,0 +1,27 @@
+{
+  "name": "my-yandex-game",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:yandex": "vite --mode yandex",
+    "dev:vk": "vite --mode vk",
+    "dev:tma": "vite --mode tma",
+    "dev:web": "vite --mode web",
+    "build": "tsc && vite build",
+    "build:yandex": "tsc && vite build --mode yandex",
+    "build:vk": "tsc && vite build --mode vk",
+    "build:tma": "tsc && vite build --mode tma",
+    "build:web": "tsc && vite build --mode web",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "@vkontakte/vk-bridge": "^3.0.2",
+    "phaser": "^4.2.1"
+  }
+}
