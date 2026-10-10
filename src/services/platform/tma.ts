@@ -104,12 +104,32 @@ export class TmaPlatform implements IPlatform {
       }
     }
 
-    // Яндекс.Метрика — основная аналитика (визиты, удержание, вебвизор, цели)
+    // Яндекс.Метрика — визиты, удержание, вебвизор, цели
     this.ymId = import.meta.env.VITE_YM_COUNTER_ID || '';
     if (this.ymId) this.initMetrica();
+
+    // PostHog — событийная аналитика, устойчива к VPN (EU/US cloud)
+    if (import.meta.env.VITE_POSTHOG_KEY) this.initPostHog();
   }
 
   private ymId = '';
+  private ph: any = null; // PostHog instance
+
+  // posthog-js тянем динамически — в остальные сборки (yandex/vk/web) он не попадает
+  private async initPostHog(): Promise<void> {
+    try {
+      const { default: posthog } = await import('posthog-js');
+      posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
+        api_host: import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com',
+        person_profiles: 'identified_only'
+      });
+      const uid = this.webApp?.initDataUnsafe?.user?.id;
+      if (uid) posthog.identify(`tg_${uid}`);
+      this.ph = posthog;
+    } catch (e) {
+      console.warn('[TMA] PostHog init не удался:', e);
+    }
+  }
 
   // Официальный бутстрап Метрики: tag.js НЕ создаёт window.ym сам —
   // нужна очередь-стаб, которую tag.js разгребёт после загрузки.
@@ -138,6 +158,7 @@ export class TmaPlatform implements IPlatform {
   public trackEvent(name: string, data?: Record<string, unknown>): void {
     try { this.tracker?.track(name, data); } catch { /* аналитика не должна ломать игру */ }
     try { if (this.ymId) ym(this.ymId, 'reachGoal', name, data); } catch { /* то же */ }
+    try { this.ph?.capture(name, data); } catch { /* то же */ }
   }
 
   public getLang(): string {

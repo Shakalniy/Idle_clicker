@@ -150,7 +150,21 @@ VITE_ADSGRAM_BLOCK_ID=12345
 
 ## 7.5 Аналитика
 
-У Telegram нет встроенной аналитики мини-аппов — подключены две системы, обе опциональны и не ломают игру без ключей.
+У Telegram нет встроенной аналитики мини-аппов — подключены три системы, все опциональны и не ломают игру без ключей.
+
+### PostHog (основная, устойчива к VPN)
+
+1. [posthog.com](https://posthog.com) → Sign up → выберите **EU cloud** → Project → скопируйте **Project API key**.
+2. В `.env.tma`:
+   ```env
+   VITE_POSTHOG_KEY=<project api key>
+   VITE_POSTHOG_HOST=https://eu.i.posthog.com
+   ```
+3. Те же переменные — в **Settings → Variables → Actions** для CI (в `deploy.yml` уже проброшены).
+
+Покрывает игроков, у которых WebView идёт через VPN (в отличие от `mc.yandex.ru`). События `session_start`, `prestige_win`, `rewarded_ad_watched` улетают через `capture`, пользователи идентифицируются как `tg_<user_id>`. Бесплатный тариф — 1 млн событий/мес + session replay + feature flags.
+
+### Яндекс.Метрика (визиты, вебвизор — без VPN)
 
 ### Яндекс.Метрика (основная)
 
