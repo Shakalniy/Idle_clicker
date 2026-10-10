@@ -106,21 +106,33 @@ export class TmaPlatform implements IPlatform {
 
     // Яндекс.Метрика — основная аналитика (визиты, удержание, вебвизор, цели)
     this.ymId = import.meta.env.VITE_YM_COUNTER_ID || '';
-    if (this.ymId && typeof ym === 'function') {
-      try {
-        ym(this.ymId, 'init', {
-          clickmap: true,
-          trackLinks: true,
-          accurateTrackBounce: true,
-          webvisor: true
-        });
-      } catch (e) {
-        console.warn('[TMA] Метрика init не удалась:', e);
-      }
-    }
+    if (this.ymId) this.initMetrica();
   }
 
   private ymId = '';
+
+  // Официальный бутстрап Метрики: tag.js НЕ создаёт window.ym сам —
+  // нужна очередь-стаб, которую tag.js разгребёт после загрузки.
+  // Без стаба вызов ym(id,'init') просто невозможен и хит не уходит.
+  private initMetrica(): void {
+    try {
+      const w = window as unknown as { ym?: any };
+      w.ym = w.ym || function (...args: unknown[]) { (w.ym.a = w.ym.a || []).push(args); };
+      w.ym.l = Date.now();
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://mc.yandex.ru/metrika/tag.js';
+      document.head.appendChild(s);
+      w.ym(this.ymId, 'init', {
+        clickmap: true,
+        trackLinks: true,
+        accurateTrackBounce: true,
+        webvisor: true
+      });
+    } catch (e) {
+      console.warn('[TMA] Метрика init не удалась:', e);
+    }
+  }
 
   // Кастомные события аналитики. Молча теряются без трекеров.
   public trackEvent(name: string, data?: Record<string, unknown>): void {
