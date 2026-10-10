@@ -8,7 +8,9 @@ const PLATFORM_SCRIPTS: Record<string, string[]> = {
   vk: [], // vk-bridge подключается из npm-бандла, внешний скрипт не нужен
   tma: [
     'https://telegram.org/js/telegram-web-app.js',
-    'https://sad.adsgram.ai/js/master.js' // реклама Adsgram; активируется через VITE_ADSGRAM_BLOCK_ID
+    'https://sad.adsgram.ai/js/master.js', // реклама Adsgram; активируется через VITE_ADSGRAM_BLOCK_ID
+    'https://s3.eu-central-1.amazonaws.com/cdn.telemetree.io/telemetree-pixel.js', // Telemetree; VITE_TELEMETREE_*
+    'https://mc.yandex.ru/metrika/tag.js' // Яндекс.Метрика; активируется через VITE_YM_COUNTER_ID
   ],
   web: []
 };

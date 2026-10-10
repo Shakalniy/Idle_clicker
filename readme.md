@@ -172,6 +172,26 @@ my-yandex-game/
 
 ---
 
+## 🤖 Android-сборка для RuStore (Capacitor)
+
+Игра завернута в Android-приложение через Capacitor — нативный проект лежит в `android/`, `appId`: `com.gemminer.idle`.
+
+* `npm run sync:android` — собрать `dist` (режим `web`, без внешних SDK) и синхронизировать в `android/`.
+* `npm run apk:debug` — debug-APK → `android/app/build/outputs/apk/debug/app-debug.apk`.
+* `npm run apk:release` — release-AAB → `android/app/build/outputs/bundle/release/app-release.aab`.
+* `npm run android:open` — открыть проект в Android Studio.
+
+**Требования:** JDK из состава Android Studio (`JAVA_HOME=C:\Program Files\Android\Android Studio\jbr`), SDK путь прописан в `android/local.properties` (не коммитится).
+
+**Перед публикацией в RuStore:**
+1. Создайте keystore: `keytool -genkey -v -keystore release.keystore -alias upload -keyalg RSA -keysize 2048 -validity 10000` и настройте подпись в `android/app/build.gradle` (или через `key.properties` — файлы уже в `.gitignore`).
+2. Поднимите `versionCode`/`versionName` в `android/app/build.gradle`.
+3. Соберите `npm run apk:release` и загрузите AAB в [консоль RuStore](https://www.rustore.ru/console/).
+
+Иконка и сплэш сгенерированы из `assets/icon.png` (исходник 512×512 — `assets/icon-512.png`); регенерация: `npx @capacitor/assets generate --android`.
+
+---
+
 ## 🗺️ Что можно добавить дальше (Дорожная карта)
 
 ### Этап 1. Интеграция социальных фич Яндекса — ✅ Выполнен

@@ -26,3 +26,9 @@ dist-ssr
 *.sln
 *.sw?
 .env*
+media
+
+# Подпись Android-релизов — не коммитить ключи
+*.keystore
+*.jks
+key.properties

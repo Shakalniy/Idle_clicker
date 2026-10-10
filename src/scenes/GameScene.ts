@@ -624,6 +624,7 @@ export class GameScene extends Phaser.Scene {
 
     // Счётчик сессий: на 3-й мягкий намёк про шорткат на главный экран
     this.state.sessionsPlayed = (this.state.sessionsPlayed || 0) + 1;
+    this.sdk.trackEvent?.('session_start', { session: this.state.sessionsPlayed, tier: this.state.crystalTier });
     if (this.state.sessionsPlayed === 3 && this.sdk.capabilities.shortcut) {
       const sl = this.sdk.shortcutLabel ? L(this.sdk.shortcutLabel) : tt('на главный экран', 'to home screen');
       this.time.delayedCall(8000, () => this.spawnFloatingText(CX, 235, `📱 ☰ → ${sl}!`, false, true));
@@ -1818,6 +1819,7 @@ export class GameScene extends Phaser.Scene {
       this.updateUI();
       this.sdk.saveData(this.state);
       this.sdk.submitLeaderboardScore(this.state.crystalTier, this.state.coins);
+      this.sdk.trackEvent?.('prestige_win', { tier: this.state.crystalTier });
 
       // После первой эволюции — предложить оценить игру в каталоге
       if (this.state.crystalTier === 1) this.sdk.requestReview();
@@ -2676,7 +2678,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     this.sdk.showRewarded(
-      onReward,
+      () => { this.sdk.trackEvent?.('rewarded_ad_watched'); onReward(); },
       () => { this.sound.mute = true; this.sdk.gameplayStop(); },
       () => { this.sound.mute = this.isMuted; this.sdk.gameplayStart(); }
     );

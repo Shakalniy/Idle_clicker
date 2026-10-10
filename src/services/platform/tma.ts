@@ -11,6 +11,8 @@ import {
 
 declare const Telegram: any;
 declare const Adsgram: any;
+declare const telemetree: any;
+declare const ym: any; // Яндекс.Метрика
 
 // Адаптер под Telegram Mini Apps (TMA).
 // Скрипты telegram-web-app.js и adsgram подключаются в index.html при сборке (--mode tma).
@@ -29,6 +31,7 @@ export class TmaPlatform implements IPlatform {
   private webApp: any = null;
   private isDevMode = false;
   private adController: any = null;
+  private tracker: any = null; // Telemetree builder
 
   public readonly id = 'tma';
   public readonly capabilities: PlatformCapabilities = {
@@ -83,6 +86,46 @@ export class TmaPlatform implements IPlatform {
         console.warn('[TMA] Adsgram init не удался:', e);
       }
     }
+
+    // Аналитика Telemetree: pageview/сессии собираются автоматически,
+    // кастомные события — через trackEvent(). NB: сервис нестабилен (см. DEPLOY_TG.md)
+    const tmProject = import.meta.env.VITE_TELEMETREE_PROJECT_ID;
+    const tmKey = import.meta.env.VITE_TELEMETREE_API_KEY;
+    if (tmProject && tmKey && typeof telemetree === 'function') {
+      try {
+        this.tracker = telemetree({
+          projectId: tmProject,
+          apiKey: tmKey,
+          appName: 'Idle Crystal Clicker',
+          isTelegramContext: true
+        });
+      } catch (e) {
+        console.warn('[TMA] Telemetree init не удался:', e);
+      }
+    }
+
+    // Яндекс.Метрика — основная аналитика (визиты, удержание, вебвизор, цели)
+    this.ymId = import.meta.env.VITE_YM_COUNTER_ID || '';
+    if (this.ymId && typeof ym === 'function') {
+      try {
+        ym(this.ymId, 'init', {
+          clickmap: true,
+          trackLinks: true,
+          accurateTrackBounce: true,
+          webvisor: true
+        });
+      } catch (e) {
+        console.warn('[TMA] Метрика init не удалась:', e);
+      }
+    }
+  }
+
+  private ymId = '';
+
+  // Кастомные события аналитики. Молча теряются без трекеров.
+  public trackEvent(name: string, data?: Record<string, unknown>): void {
+    try { this.tracker?.track(name, data); } catch { /* аналитика не должна ломать игру */ }
+    try { if (this.ymId) ym(this.ymId, 'reachGoal', name, data); } catch { /* то же */ }
   }
 
   public getLang(): string {

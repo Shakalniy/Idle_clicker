@@ -33,6 +33,9 @@ jobs:
         env:
           VITE_TG_APP_URL: ${{ vars.VITE_TG_APP_URL }}
           VITE_ADSGRAM_BLOCK_ID: ${{ vars.VITE_ADSGRAM_BLOCK_ID }}
+          VITE_TELEMETREE_PROJECT_ID: ${{ vars.VITE_TELEMETREE_PROJECT_ID }}
+          VITE_TELEMETREE_API_KEY: ${{ vars.VITE_TELEMETREE_API_KEY }}
+          VITE_YM_COUNTER_ID: ${{ vars.VITE_YM_COUNTER_ID }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

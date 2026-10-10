@@ -68,4 +68,8 @@ export interface IPlatform {
   // Социальные фичи платформы
   requestReview(): Promise<void>;
   promptShortcut(): Promise<boolean>;
+
+  // Аналитика (Telemetree в TMA). Необязательный метод — события просто теряются,
+  // если платформа аналитику не поддерживает.
+  trackEvent?(name: string, data?: Record<string, unknown>): void;
 }
